@@ -15,7 +15,7 @@ int main() {
     // Emulation loop
     for (;;) {
         // Emulate one cycle
-        //core.emulateCycle();
+        core.emulateCycle();
 
         // If the draw flag is set, update the screen
         //if(core.drawFlag){

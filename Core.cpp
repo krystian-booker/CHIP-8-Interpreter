@@ -14,7 +14,6 @@ Core::~Core() {
 
 // Clear the memory, registers and screen
 void Core::initialize() {
-    // Initialize registers and memory once
     pc = 0x200; //Program counter starts at 0x200
     opcode = 0; //Reset current opcode
     I = 0;      //Reset index register
@@ -42,8 +41,8 @@ void Core::loadGame(const char *romName) {
     }
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(inFile), {});
-    if (((int) buffer.size() - 1) + 512 < 4096) {
-        std::copy(buffer.begin(), buffer.end(), std::begin(memory) + 512);
+    if (((int) buffer.size() - 1) + (int) pc < 4096) {
+        std::copy(buffer.begin(), buffer.end(), std::begin(memory) + (int) pc);
     } else {
         std::cerr << "Invalid rom size." << std::endl;
         exit(1);
@@ -60,14 +59,40 @@ void Core::loadGame(const char *romName) {
 
 // Emulate one cycle of the system
 void Core::emulateCycle() {
-    //Fetch Opcode
-    //To fetch the pc will specify the location.
-    //As one opcode is two bytes long we will need to grab
-    //two successive bytes and merge them to get the opcode.
-    //ex. opcode = memory[pc] << 8 | memory[pc + 1]; //shift 0xA2 left 8 bits then OR 0xF0
+    // Fetch Opcode:
+    // To fetch the pc will specify the location.
+    // As one opcode is two bytes long we will need to grab
+    // two successive bytes and merge them to get the opcode.
+    // 1010001000000000 |  // 0xA200
+    //         11110000 =  // 0xF0 (0x00F0)
+    // ------------------
+    // 1010001011110000    // 0xA2F0
 
-    //Decode Opcode
-    // 0xA2F0 = assembly nvi 2F0h = opcode table: ANNN: Sets I to the address of NNN (0x2F0)
+    //shift first byte left by 8 bits then bitwise OR second byte
+    opcode = memory[pc] << 8 | memory[pc + 1];
+
+    // Decode Opcode:
+    // Break the opcode down for a multi-level switch statement
+    // 1010001011110000 0xA2F0
+    // 1111000000000000 0xF000
+    // ----------------
+    // 1010000000000000 0xA000
+    switch (opcode & 0xF000) {
+        case 0x000:
+            switch (opcode & 0x000F) {
+                case 0x000: // 0x00E0: Clears the screen
+                    //Execute opcode
+                    break;
+                case 0x00E: // 0x00EE: returns from subroutine
+                    //Execute opcode
+                    break;
+                default:
+                    unknownOpcode();
+            }
+            break;
+        default:
+            unknownOpcode();
+    }
 
     //Execute Opcode
     //0xA2F0: we need to store 0x2F0 into the index register I
@@ -83,4 +108,9 @@ void Core::emulateCycle() {
     //Update timers
     //Timers count down at 60Hz, we need to implement something that slow down the emulation cycle
     //Execute 60 opcodes in one second
+}
+
+void Core::unknownOpcode() {
+    std::cerr << "Unknown opcode: " << opcode << std::endl;
+    exit(1);
 }
