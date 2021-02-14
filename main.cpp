@@ -1,11 +1,16 @@
+// System Headers
 #include <iostream>
+
+// Local Headers
 #include "Core.h"
+#include "Renderer.h"
 
 Core core;
+Renderer renderer;
 
 int main() {
     // Set up render system and register input callbacks
-    //setupGraphics();
+    renderer.Createwindow();
     //setupInput();
 
     // Initialize the Chip8 system and load the game into memory
