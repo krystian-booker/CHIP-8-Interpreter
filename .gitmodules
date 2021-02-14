@@ -2,3 +2,7 @@
 	path = lib/GLFW
 	url = https://github.com/glfw/glfw.git
 	branch = 3.3-stable
+[submodule "lib/glad"]
+	path = lib/glad
+	url = https://github.com/Dav1dde/glad.git
+	branch = c
