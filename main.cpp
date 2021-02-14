@@ -10,7 +10,7 @@ int main() {
 
     // Initialize the Chip8 system and load the game into memory
     core.initialize();
-    core.loadGame("test_opcode.ch8");
+    core.loadGame("chip8-test-rom.ch8");
 
     // Emulation loop
     for (;;) {

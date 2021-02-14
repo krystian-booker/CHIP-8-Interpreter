@@ -1,7 +1,5 @@
 #include "Core.h"
-#include <stdint.h>
 #include <fstream>
-#include <iterator>
 #include <vector>
 #include <iostream>
 #include <string>
@@ -78,17 +76,87 @@ void Core::emulateCycle() {
     // ----------------
     // 1010000000000000 0xA000
     switch (opcode & 0xF000) {
-        case 0x000:
+        case 0x0000:
+            // 11100000 0x00E0
+            // 00001111 0x000F
+            // ----------------
+            // 00000000 0x000
             switch (opcode & 0x000F) {
                 case 0x000: // 0x00E0: Clears the screen
-                    //Execute opcode
+                    //TODO: Execute opcode
+                    //clearScreen();
+                    drawFlag = true;
+
+                    pc += 2;
                     break;
                 case 0x00E: // 0x00EE: returns from subroutine
-                    //Execute opcode
+                    if(sp == 0){
+                        std::cerr << "Stack pointer out of range" << std::endl;
+                        exit(1);
+                    }
+                    pc = stack[--sp];
                     break;
                 default:
                     unknownOpcode();
             }
+            break;
+        case 0x1000: // 1NNN: Jumps to address NNN
+            pc = getNNN();
+            break;
+        case 0x2000: { // 2NNN: Calls subroutine at NNN
+                //Store current program counter location
+                stack[sp] = pc;
+                ++sp;
+
+                //Set program counter to location of subroutine
+                unsigned short subroutineAddress = getNNN();
+                pc = subroutineAddress;
+            }
+            break;
+        case 0x3000: // 3XNN: Skips the next instruction if VX equals NN
+            if(V[getX()] == getNN()){
+                pc += 2;
+            }
+            pc += 2;
+            break;
+        case 0x4000: // 4XNN: Skips the next instruction if VX doesn't equal NN
+            if(V[getX()] != getNN()){
+                pc += 2;
+            }
+            pc += 2;
+            break;
+        case 0x5000: // 5XY0: Skips the next instruction if VX equals VY
+            if(V[getX()] == V[getY()]){
+                pc += 2;
+            }
+            pc += 2;
+            break;
+        case 0x6000: // 6XNN: Sets VX to NN
+            V[getX()] = getNN();
+            pc += 2;
+            break;
+        case 0x7000: // 7XNN: Adds NN to VX. (Carry flag is not changed)
+            V[getX()] += getNN();
+            pc += 2;
+            break;
+        case 0x8000:
+            //TODO: Execute opcode
+            unknownOpcode();
+            break;
+        case 0x9000: // 9XY0: Skips the next instruction if VX doesn't equal VY
+            if(V[getX()] != V[getY()]){
+                pc += 2;
+            }
+            pc += 2;
+            break;
+        case 0xA000: // ANNN: Sets I to the address NNN
+            I = getNNN();
+            pc += 2;
+            break;
+        case 0xD000: // DXYN: Draws a sprite at coordinate (VX, VY)
+            std::cout << "Draw called" << std::endl;
+            //TODO: Execute opcode
+            pc += 2;
             break;
         default:
             unknownOpcode();

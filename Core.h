@@ -71,8 +71,8 @@ private:
 
     //Anytime you perform a jump or call a subroutine,
     //store the program counter in the stack before proceeding
-    unsigned short stack[16];
-    unsigned short sp;
+    unsigned short stack[16] = {0};
+    unsigned short sp = {0};
 
     bool debug = {false};
 
