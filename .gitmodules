@@ -1,0 +1,4 @@
+[submodule "lib/GLFW"]
+	path = lib/GLFW
+	url = https://github.com/glfw/glfw.git
+	branch = 3.3-stable
