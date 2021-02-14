@@ -18,9 +18,21 @@ int main() {
         core.emulateCycle();
 
         // If the draw flag is set, update the screen
-        //if(core.drawFlag){
-        //drawGraphics();
-        //}
+        if (core.drawFlag) {
+            int columnCount = 0;
+            int lineCount = 0;
+            for (int i = 0; i < 2048; i++) {
+                std::cout << (int) core.gfx[i];
+                columnCount++;
+                if (columnCount == 64) {
+                    lineCount++;
+                    std::cout << ": end of line " << lineCount << std::endl;
+                    columnCount = 0;
+                }
+            }
+            core.drawFlag = false;
+            //drawGraphics();
+        }
 
         // Store key press state (Press and Release)
         //core.setKeys();
