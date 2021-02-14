@@ -58,7 +58,7 @@ private:
 
     //Chip 8 has 15 8-bit general purpose registers
     //Name from V0-VE. The 16th register is the 'carry flag'
-    unsigned char V[16];
+    unsigned char V[16] = {0};
 
     //The index register (I) and program count (pc) can
     //have a value from 0x000 to 0xFFF
@@ -80,6 +80,7 @@ private:
     unsigned short getY();
     unsigned short getNN();
     unsigned short getNNN();
+    unsigned short getKey();
     void unknownOpcode();
 };
 
