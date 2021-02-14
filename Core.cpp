@@ -110,6 +110,34 @@ void Core::emulateCycle() {
     //Execute 60 opcodes in one second
 }
 
+unsigned short Core::getX(){
+    //ex. opcode = 0x6801;
+    //0110100000000001
+    //0000111100000000
+    //----------------
+    //100000000000 >> 8 (shift right 8 bits, which removes 8 zeros)
+    //1000 (8 in decimal/hex)
+    return (opcode & 0x0F00) >> 8;
+}
+
+unsigned short Core::getY(){
+    //ex. opcode = 0x5560;
+    //0101010101100000
+    //0000000011110000
+    //----------------
+    //0000000001100000 >> 4 (shift right 4 bits, which removes 4 zeros)
+    //1111 (15 in decimal/ F in hex)
+    return (opcode & 0x00F0) >> 4;
+}
+
+unsigned short Core::getNN(){
+    return (opcode & 0x00FF);
+}
+
+unsigned short Core::getNNN(){
+    return (opcode & 0x0FFF);
+}
+
 void Core::unknownOpcode() {
     std::cerr << "Unknown opcode: " << opcode << std::endl;
     exit(1);
