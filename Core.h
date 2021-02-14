@@ -76,6 +76,10 @@ private:
 
     bool debug = {false};
 
+    unsigned short getX();
+    unsigned short getY();
+    unsigned short getNN();
+    unsigned short getNNN();
     void unknownOpcode();
 };
 
