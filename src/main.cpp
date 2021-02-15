@@ -3,18 +3,10 @@
 
 // Local Headers
 #include "Core.h"
-#include "Renderer.h"
 
 Core core;
-Renderer renderer;
 
 int main() {
-    // Set up render system and
-    int status = renderer.Initialize(64, 32);
-    if(status != 0){
-        std::cerr << "Issues initialize window" << std::endl;
-    }
-
     //Register input callbacks
     //setupInput();
 
@@ -23,7 +15,7 @@ int main() {
     core.loadGame("chip8-test-rom.ch8");
 
     // Emulation loop
-    while (!renderer.WindowShouldClose()) {
+    while (true) {
         // Emulate one cycle
         core.emulateCycle();
 
@@ -47,13 +39,6 @@ int main() {
 
         // Store key press state (Press and Release)
         //core.setKeys();
-
-        renderer.BackgroundColor();
-
-        renderer.Draw();
-
-        renderer.Update();
     }
-    renderer.Terminate();
     return 0;
 }
