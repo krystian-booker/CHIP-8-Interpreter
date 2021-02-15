@@ -11,7 +11,7 @@
 class Core {
 public:
     //2048 pixels (64 x 32) State of either 1 or 0
-    std::array<std::array<unsigned char, 64>, 32> Graphics; //[32][64];
+    unsigned char Graphics[64 * 32] = {0};
 
     //Chip 8 has a HEX based keypad 0x0-0xF
     unsigned char Key[16];

@@ -42,7 +42,7 @@ void Renderer::Terminate() {
     SDL_Quit();
 }
 
-int Renderer::Update(std::array<std::array<unsigned char, 64>, 32> _graphics, bool _updateFrame) {
+int Renderer::Update(unsigned char _graphics[64 * 32], bool _updateFrame) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
@@ -50,7 +50,7 @@ int Renderer::Update(std::array<std::array<unsigned char, 64>, 32> _graphics, bo
         }
     }
 
-    if(_updateFrame){
+    if (_updateFrame) {
         draw(_graphics);
     }
 
@@ -58,7 +58,7 @@ int Renderer::Update(std::array<std::array<unsigned char, 64>, 32> _graphics, bo
     return 0;
 }
 
-void Renderer::draw(std::array<std::array<unsigned char, 64>, 32> _graphics) {
+void Renderer::draw(unsigned char _graphics[64 * 32]) {
     //Set background color
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
     SDL_RenderClear(renderer);
@@ -66,11 +66,9 @@ void Renderer::draw(std::array<std::array<unsigned char, 64>, 32> _graphics) {
     //Set draw point color
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    int rowNum;
-    for (int y = 0; y < 32; y++) {
-        for (int x = 0; x < 64; x++) {
-            rowNum = y * 64;
-            if(_graphics[y][x]){
+    for (int x = 0; x < 64; x++) {
+        for (int y = 0; y < 32; y++) {
+            if (_graphics[(y * 64) + x] == 1) {
                 SDL_RenderDrawPoint(renderer, x, y);
             }
         }

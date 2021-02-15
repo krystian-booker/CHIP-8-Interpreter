@@ -7,7 +7,7 @@
 class Renderer {
 public:
     int Initialize(int _width, int _height);
-    int Update(std::array<std::array<unsigned char, 64>, 32> _graphics, bool _updateFrame);
+    int Update(unsigned char _graphics[64 * 32], bool _updateFrame);
 
     void Terminate();
 private:
@@ -18,7 +18,7 @@ private:
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
 
-    void draw(std::array<std::array<unsigned char, 64>, 32> _graphics);
+    void draw(unsigned char _graphics[64 * 32]);
 };
 
 

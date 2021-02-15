@@ -243,20 +243,28 @@ void Core::EmulateCycle() {
         }
             break;
         case 0xD000: {// DXYN: Draws a sprite at coordinate (VX, VY)
+            //Graphics drawing from
+            //http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter#
+            unsigned short x = V[(opcode & 0x0F00) >> 8];
+            unsigned short y = V[(opcode & 0x00F0) >> 4];
+            unsigned short height = opcode & 0x000F;
+            unsigned short pixel;
+
             V[0xF] = 0;
-            for (int j = 0; j < (opcode & 0x000F); j++) {
-                uint8_t sprite = memory[I + j];
-                for (int i = 0; i < 8; i++) {
-                    int x = (V[(opcode & 0x0F00) >> 8] + i) % 64;
-                    int y = (V[(opcode & 0x00F0) >> 4] + j) % 32;
-                    if ((sprite & (0x80 >> i)) != 0) {
-                        if (Graphics[y][x]) {
+            for (int yline = 0; yline < height; yline++)
+            {
+                pixel = memory[I + yline];
+                for(int xline = 0; xline < 8; xline++)
+                {
+                    if((pixel & (0x80 >> xline)) != 0)
+                    {
+                        if(Graphics[(x + xline + ((y + yline) * 64))] == 1)
                             V[0xF] = 1;
-                        }
-                        Graphics[y][x] = !Graphics[y][x];
+                        Graphics[x + xline + ((y + yline) * 64)] ^= 1;
                     }
                 }
             }
+
             DrawFlag = true;
             pc += 2;
         }
@@ -437,8 +445,9 @@ unsigned short Core::getKey() {
 }
 
 void Core::clearDisplay() {
-    for (auto &row : Graphics)
-        row.fill(0);
+    for(int i = 0; i < 2048; i++){
+        Graphics[i] = 0;
+    }
 }
 
 void Core::unknownOpcode() {
