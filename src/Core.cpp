@@ -93,10 +93,11 @@ void Core::EmulateCycle() {
                     break;
                 case 0x00E: {// 0x00EE: returns from subroutine
                     if (sp <= 0) {
-                        std::cerr << "Stack pointer out of range" << std::endl;
+                        std::cerr << "stack underflow" << std::endl;
                         exit(1);
                     }
-                    pc = stack[--sp];
+                    pc = stack[sp];
+                    sp--;
                 }
                     break;
                 default: {
@@ -111,7 +112,13 @@ void Core::EmulateCycle() {
             break;
         case 0x2000: { // 2NNN: Calls subroutine at NNN
             //Store current program counter location
-            stack[sp++] = pc + 2;
+            sp++;
+            if(sp >= 16){
+                std::cerr << "Stack overflow" << std::endl;
+                exit(1);
+            }
+
+            stack[sp] = pc + 2;
             pc = getNNN();
         }
             break;
@@ -142,7 +149,13 @@ void Core::EmulateCycle() {
         }
             break;
         case 0x7000: {// 7XNN: Adds NN to VX. (Carry flag is not changed)
-            V[getX()] += getNN();
+
+            //TODO: Is this necessary?
+            unsigned short v = V[getX()] + getNN();
+            if(v > 255){
+                v -= 256;
+            }
+            V[getX()] = v;
             pc += 2;
         }
             break;
@@ -170,18 +183,14 @@ void Core::EmulateCycle() {
                     break;
                 case 0x004: {// 8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
                     //TODO: Add documentation
-                    if (V[getY()] > (0xFF - V[getX()])) {
-                        V[0xF] = 1;
-                    } else {
-                        V[0xF] = 0;
-                    }
+                    V[0xF] = ((int) V[getX()] + (int) V[getY()]) > 255 ? 1 : 0;
                     V[getX()] += V[getY()];
                     pc += 2;
                 }
                     break;
                 case 0x005: {// 8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't
                     //TODO: Add documentation
-                    V[0xF] = (V[getY()] > V[getX()]) ? 0 : 1;
+                    V[0xF] = (V[getX()] > V[getY()]) ? 1 : 0;
                     V[getX()] -= V[getY()];
                     pc += 2;
                 }
@@ -194,12 +203,7 @@ void Core::EmulateCycle() {
                     break;
                 case 0x007: {// 8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
                     //TODO: Add documentation
-                    if (V[getY()] > V[getX()]) {
-                        V[0xF] = 0;
-                    } else {
-                        V[0xF] = 1;
-                    }
-
+                    V[0xF] = (V[getY()] > V[getX()]) ? 1 : 0;
                     V[getX()] = V[getY()] - V[getX()];
                     pc += 2;
                 }
@@ -229,7 +233,7 @@ void Core::EmulateCycle() {
         }
             break;
         case 0xB000: {// BNNN: Jumps to the address NNN plus V0.
-            pc = (opcode & 0x0FFF) + V[0];
+            pc = getNNN() + V[0];
         }
             break;
         case 0xC000: {// CXNN: Sets VX to the result of a bitwise and operation on a random number
@@ -308,7 +312,7 @@ void Core::EmulateCycle() {
                 }
                     break;
                 case 0x01E: {// FX1E: Adds VX to I. VF is not affected.
-                    V[0xF] = (I + V[getX()] > 0xFFF ? 1 : 0);
+                    V[0xF] = (I + V[getX()] > 0xFFF) ? 1 : 0;
                     I += V[getX()];
                     pc += 2;
                 }
@@ -328,6 +332,12 @@ void Core::EmulateCycle() {
                      * place the hundreds digit in memory at location in I, the tens digit at location I+1,
                      * and the ones digit at location I+2.)
                      */
+
+                    std::cout << (int)V[getX()] << std::endl;
+                    std::cout << (int)(V[getX() % 1000] / 100) << std::endl;
+                    std::cout << (int)((V[getX()] % 100) / 10) << std::endl;
+                    std::cout << (int)(V[getX()] % 10) << std::endl;
+
                     memory[I] = V[getX()] / 100;     // Hundredth's digit
                     memory[I + 1] = (V[getX()] % 100) / 10; // Ten's digit
                     memory[I + 2] = V[getX()] % 10; // One's digit
