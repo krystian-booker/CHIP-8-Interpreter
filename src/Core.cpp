@@ -8,9 +8,7 @@ void Core::Initialize() {
     sp = 0;     //Reset stack pointer
 
     //Clear display
-    for (int i = 0; i < 2048; i++) {
-        Graphics[i] = 0;
-    }
+    clearDisplay();
     DrawFlag = true;
 
     //Clear stack
@@ -88,9 +86,7 @@ void Core::EmulateCycle() {
             // 00000000 0x000
             switch (opcode & 0x000F) {
                 case 0x000: {// 0x00E0: Clears the screen
-                    for (int i = 0; i < 2048; i++) {
-                        Graphics[i] = 0;
-                    }
+                    clearDisplay();
                     DrawFlag = true;
                     pc += 2;
                 }
@@ -185,11 +181,7 @@ void Core::EmulateCycle() {
                     break;
                 case 0x005: {// 8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't
                     //TODO: Add documentation
-                    if (V[getY()] > V[getX()]) {
-                        V[0xF] = 1;
-                    } else {
-                        V[0xF] = 0;
-                    }
+                    V[0xF] = (V[getY()] > V[getX()]) ? 0 : 1;
                     V[getX()] -= V[getY()];
                     pc += 2;
                 }
@@ -237,7 +229,7 @@ void Core::EmulateCycle() {
         }
             break;
         case 0xB000: {// BNNN: Jumps to the address NNN plus V0.
-            pc = (getNNN() + V[0x0]);
+            pc = (opcode & 0x0FFF) + V[0];
         }
             break;
         case 0xC000: {// CXNN: Sets VX to the result of a bitwise and operation on a random number
@@ -247,24 +239,20 @@ void Core::EmulateCycle() {
         }
             break;
         case 0xD000: {// DXYN: Draws a sprite at coordinate (VX, VY)
-            unsigned short xPos = V[getX()];
-            unsigned short yPos = V[getY()];
-            unsigned short height = opcode & 0x000F;
-            unsigned short pixel;
-
-            V[0xF] = 0; //Clear collisions
-            for (int yLine = 0; yLine < height; yLine++) { //Loop through height of sprite
-                pixel = memory[I + yLine]; //grab sprite pixel row
-                for (int xLine = 0; xLine < 8; xLine++) { //loop through all 8 bits in pixel row
-                    if ((pixel & (0x80 >> xLine)) != 0) { //check if current pixel is set to 1
-                        if (Graphics[(xPos + xLine + ((yPos + yLine) * 64))] == 1) {//register collision if pixel is 1
+            V[0xF] = 0;
+            for (int j = 0; j < (opcode & 0x000F); j++) {
+                uint8_t sprite = memory[I + j];
+                for (int i = 0; i < 8; i++) {
+                    int x = (V[(opcode & 0x0F00) >> 8] + i) % 64;
+                    int y = (V[(opcode & 0x00F0) >> 4] + j) % 32;
+                    if  ((sprite & (0x80 >> i)) != 0) {
+                        if (Graphics[y][x]){
                             V[0xF] = 1;
                         }
+                        Graphics[y][x] = !Graphics[y][x];
                     }
-                    Graphics[xPos + xLine + ((yPos + yLine) * 64)] ^= 1; //XOR the pixel value
                 }
             }
-
             DrawFlag = true;
             pc += 2;
         }
@@ -305,6 +293,7 @@ void Core::EmulateCycle() {
                 case 0x00A: {// FX0A: A Key press is awaited, and then stored in VX.
                     // (Blocking Operation. All instruction halted until next Key event)
                     V[getX()] = getKey();
+
                     pc += 2;
                 }
                     break;
@@ -434,6 +423,11 @@ unsigned short Core::getNNN() {
 unsigned short Core::getKey() {
     //TODO: Implement getKey
     return 0xF;
+}
+
+void Core::clearDisplay() {
+    for (auto &row : Graphics)
+        row.fill(0);
 }
 
 void Core::unknownOpcode() {

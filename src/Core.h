@@ -6,11 +6,12 @@
 #include <iostream>
 #include <string>
 #include <time.h>
+#include <array>
 
 class Core {
 public:
     //2048 pixels (64 x 32) State of either 1 or 0
-    unsigned char Graphics[64 * 32];
+    std::array<std::array<unsigned char, 64>, 32> Graphics; //[32][64];
 
     //Chip 8 has a HEX based keypad 0x0-0xF
     unsigned char Key[16];
@@ -80,6 +81,7 @@ private:
     unsigned short getNN();
     unsigned short getNNN();
     unsigned short getKey();
+    void clearDisplay();
     void unknownOpcode();
 };
 
