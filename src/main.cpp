@@ -1,43 +1,48 @@
 // System Headers
 #include <iostream>
+#include "chrono"
+#include "thread"
 
 // Local Headers
 #include "Core.h"
-
+#include "Renderer.h"
 Core core;
+Renderer renderer;
 
-int main() {
+int main(int argc, char *args[]) {
     //Register input callbacks
     //setupInput();
 
-    // Initialize the Chip8 system and load the game into memory
+    //Initialize the core, load rom into memory
     core.Initialize();
-    core.LoadGame("test_opcode.ch8");
+    core.LoadGame("tetris.rom");
 
-    // Emulation loop
-    while (true) {
-        // Emulate one cycle
+    renderer.Initialize(64, 32);
+
+    bool gameActive = true;
+    while (gameActive) {
         core.EmulateCycle();
+        int status = renderer.Update(core.Graphics, core.DrawFlag);
+        if (status != 0) {
+            gameActive = false;
+        }
 
-        // If the draw flag is set, update the screen
-        if (core.DrawFlag) {
-            /*int columnCount = 0;
-            int lineCount = 0;
-            for (int i = 0; i < 2048; i++) {
-                std::cout << (int) core.Graphics[i];
-                columnCount++;
-                if (columnCount == 64) {
-                    lineCount++;
-                    std::cout << ": end of line " << lineCount << std::endl;
-                    columnCount = 0;
+        if(core.DrawFlag){
+            /*for (int y = 0; y < 32; y++) {
+                for (int x = 0; x < 64; x++) {
+                    std::cout << (int) core.Graphics[y][x];
                 }
-            }*/
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+            std::cout << std::endl;
+            std::cout << std::endl;*/
 
             core.DrawFlag = false;
         }
-
-        // Store Key press state (Press and Release)
-        //core.setKeys();
+        std::this_thread::sleep_for (std::chrono::milliseconds(16)); // Sleep 16 ms
     }
+    renderer.Terminate();
+
     return 0;
 }
