@@ -18,7 +18,7 @@ int main(int argc, char *args[]) {
     core.Initialize();
     core.LoadGame("Blitz [David Winter].ch8");
 
-    renderer.Initialize(64, 32);
+    renderer.Initialize(core.GetWidth(), core.GetHeight());
 
     bool gameActive = true;
     while (gameActive) {

@@ -8,10 +8,13 @@
 #include <time.h>
 #include <array>
 
+#define WIDTH 64
+#define HEIGHT 32
+
 class Core {
 public:
     //2048 pixels (64 x 32) State of either 1 or 0
-    unsigned char Graphics[64 * 32] = {0};
+    unsigned char Graphics[WIDTH * HEIGHT] = {0};
 
     //Chip 8 has a HEX based keypad 0x0-0xF
     unsigned char Key[16];
@@ -23,6 +26,8 @@ public:
     void Initialize();
     void LoadGame(const char *romName);
     void EmulateCycle();
+    int GetWidth();
+    int GetHeight();
 private:
     unsigned char chip8_fontset[80] =
             {

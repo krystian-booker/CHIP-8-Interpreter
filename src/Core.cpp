@@ -258,9 +258,9 @@ void Core::EmulateCycle() {
                 {
                     if((pixel & (0x80 >> xline)) != 0)
                     {
-                        if(Graphics[(x + xline + ((y + yline) * 64))] == 1)
+                        if(Graphics[(x + xline + ((y + yline) * WIDTH))] == 1)
                             V[0xF] = 1;
-                        Graphics[x + xline + ((y + yline) * 64)] ^= 1;
+                        Graphics[x + xline + ((y + yline) * WIDTH)] ^= 1;
                     }
                 }
             }
@@ -453,4 +453,12 @@ void Core::clearDisplay() {
 void Core::unknownOpcode() {
     std::cerr << "Unknown opcode: " << opcode << std::endl;
     exit(1);
+}
+
+int Core::GetWidth(){
+    return WIDTH;
+}
+
+int Core::GetHeight(){
+    return HEIGHT;
 }

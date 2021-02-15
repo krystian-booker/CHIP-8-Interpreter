@@ -26,7 +26,7 @@ int Renderer::Initialize(int _width, int _height) {
 
     //Create renderer
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    SDL_RenderSetScale(renderer, 8, 8);
+    SDL_RenderSetScale(renderer, viewScaling, viewScaling);
     if (renderer == NULL) {
         std::cerr << "Renderer could not be created! SDL Error:" << SDL_GetError() << std::endl;
         return 1;
@@ -42,7 +42,7 @@ void Renderer::Terminate() {
     SDL_Quit();
 }
 
-int Renderer::Update(unsigned char _graphics[64 * 32], bool _updateFrame) {
+int Renderer::Update(unsigned char _graphics[], bool _updateFrame) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
@@ -58,7 +58,7 @@ int Renderer::Update(unsigned char _graphics[64 * 32], bool _updateFrame) {
     return 0;
 }
 
-void Renderer::draw(unsigned char _graphics[64 * 32]) {
+void Renderer::draw(unsigned char _graphics[]) {
     //Set background color
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
     SDL_RenderClear(renderer);
@@ -66,9 +66,9 @@ void Renderer::draw(unsigned char _graphics[64 * 32]) {
     //Set draw point color
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-    for (int x = 0; x < 64; x++) {
-        for (int y = 0; y < 32; y++) {
-            if (_graphics[(y * 64) + x] == 1) {
+    for (int x = 0; x < width; x++) {
+        for (int y = 0; y < height; y++) {
+            if (_graphics[(y * width) + x] == 1) {
                 SDL_RenderDrawPoint(renderer, x, y);
             }
         }
