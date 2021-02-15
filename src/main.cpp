@@ -1,11 +1,21 @@
+// System Headers
 #include <iostream>
+
+// Local Headers
 #include "Core.h"
+#include "Renderer.h"
 
 Core core;
+Renderer renderer;
 
 int main() {
-    // Set up render system and register input callbacks
-    //setupGraphics();
+    // Set up render system and
+    int status = renderer.Initialize(64, 32);
+    if(status != 0){
+        std::cerr << "Issues initialize window" << std::endl;
+    }
+
+    //Register input callbacks
     //setupInput();
 
     // Initialize the Chip8 system and load the game into memory
@@ -13,13 +23,13 @@ int main() {
     core.loadGame("chip8-test-rom.ch8");
 
     // Emulation loop
-    for (;;) {
+    while (!renderer.WindowShouldClose()) {
         // Emulate one cycle
         core.emulateCycle();
 
         // If the draw flag is set, update the screen
         if (core.drawFlag) {
-            int columnCount = 0;
+            /*int columnCount = 0;
             int lineCount = 0;
             for (int i = 0; i < 2048; i++) {
                 std::cout << (int) core.gfx[i];
@@ -29,14 +39,21 @@ int main() {
                     std::cout << ": end of line " << lineCount << std::endl;
                     columnCount = 0;
                 }
-            }
+            }*/
+
+            //renderer.drawGraphics();
             core.drawFlag = false;
-            //drawGraphics();
         }
 
         // Store key press state (Press and Release)
         //core.setKeys();
-    }
 
+        renderer.BackgroundColor();
+
+        renderer.Draw();
+
+        renderer.Update();
+    }
+    renderer.Terminate();
     return 0;
 }
