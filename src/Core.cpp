@@ -1,17 +1,7 @@
 #include "Core.h"
-#include <fstream>
-#include <vector>
-#include <iostream>
-#include <string>
-
-Core::Core() {
-}
-
-Core::~Core() {
-}
 
 // Clear the memory, registers and screen
-void Core::initialize() {
+void Core::Initialize() {
     pc = 0x200; //Program counter starts at 0x200
     opcode = 0; //Reset current opcode
     I = 0;      //Reset index register
@@ -19,8 +9,9 @@ void Core::initialize() {
 
     //Clear display
     for (int i = 0; i < 2048; i++) {
-        gfx[i] = 0;
+        Graphics[i] = 0;
     }
+    DrawFlag = true;
 
     //Clear stack
     stack[16] = {0};
@@ -32,15 +23,20 @@ void Core::initialize() {
     memory[4096] = {0};
 
     //Load font set
-    for (int i = 0; i < 80; ++i) {
+    for (int i = 0; i < 80; i++) {
         memory[i] = chip8_fontset[i];
     }
 
     //Reset timers
+    delayTimer = 0;
+    soundTimer = 0;
+
+    //Random seed
+    srand(time(NULL));
 }
 
 // Copy the program into the memory
-void Core::loadGame(const char *romName) {
+void Core::LoadGame(const char *romName) {
     std::ifstream inFile(romName, std::ios::binary | std::ios::in);
     if (!inFile.is_open()) {
         std::cerr << "Problem opening file." << std::endl;
@@ -56,7 +52,7 @@ void Core::loadGame(const char *romName) {
     }
 
     if (debug) {
-        for (int i = 0; i < 4096; ++i) {
+        for (int i = 0; i < 4096; i++) {
             std::cout << (int) memory[i] << " ";
         }
     }
@@ -65,7 +61,7 @@ void Core::loadGame(const char *romName) {
 }
 
 // Emulate one cycle of the system
-void Core::emulateCycle() {
+void Core::EmulateCycle() {
     // Fetch Opcode:
     // To fetch the pc will specify the location.
     // As one opcode is two bytes long we will need to grab
@@ -92,15 +88,15 @@ void Core::emulateCycle() {
             // 00000000 0x000
             switch (opcode & 0x000F) {
                 case 0x000: {// 0x00E0: Clears the screen
-                    for (int i = 0; i < 2048; ++i) {
-                        gfx[i] = 0;
+                    for (int i = 0; i < 2048; i++) {
+                        Graphics[i] = 0;
                     }
-                    drawFlag = true;
+                    DrawFlag = true;
                     pc += 2;
                 }
                     break;
                 case 0x00E: {// 0x00EE: returns from subroutine
-                    if (sp == 0) {
+                    if (sp <= 0) {
                         std::cerr << "Stack pointer out of range" << std::endl;
                         exit(1);
                     }
@@ -155,8 +151,77 @@ void Core::emulateCycle() {
         }
             break;
         case 0x8000: {
-            //TODO: Execute opcode
-            unknownOpcode();
+            switch (opcode & 0x000F) {
+                case 0x000: {// 8XY0: Sets VX to the value of VY
+                    V[getX()] = V[getY()];
+                    pc += 2;
+                }
+                    break;
+                case 0x001: {// 8XY1: Sets VX to VX or VY
+                    V[getX()] = (V[getX()] | V[getY()]);
+                    pc += 2;
+                }
+                    break;
+                case 0x002: {// 8XY2: Sets VX to VX and VY
+                    V[getX()] = (V[getX()] & V[getY()]);
+                    pc += 2;
+                }
+                    break;
+                case 0x003: {// 8XY3: Sets VX to VX xor VY
+                    V[getX()] = (V[getX()] ^ V[getY()]);
+                    pc += 2;
+                }
+                    break;
+                case 0x004: {// 8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
+                    //TODO: Add documentation
+                    if (V[getY()] > (0xFF - V[getX()])) {
+                        V[0xF] = 1;
+                    } else {
+                        V[0xF] = 0;
+                    }
+                    V[getX()] += V[getY()];
+                    pc += 2;
+                }
+                    break;
+                case 0x005: {// 8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't
+                    //TODO: Add documentation
+                    if (V[getY()] > V[getX()]) {
+                        V[0xF] = 1;
+                    } else {
+                        V[0xF] = 0;
+                    }
+                    V[getX()] -= V[getY()];
+                    pc += 2;
+                }
+                    break;
+                case 0x006: {// 8XY6: Stores the least significant bit of VX in VF and then shifts VX to the right by 1
+                    V[0xF] = V[getX()] & 0x1;
+                    V[getX()] = V[getX()] >> 1;
+                    pc += 2;
+                }
+                    break;
+                case 0x007: {// 8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
+                    //TODO: Add documentation
+                    if (V[getY()] > V[getX()]) {
+                        V[0xF] = 0;
+                    } else {
+                        V[0xF] = 1;
+                    }
+
+                    V[getX()] = V[getY()] - V[getX()];
+                    pc += 2;
+                }
+                    break;
+                case 0x00E: {// 8XYE: Stores the most significant bit of VX in VF and then shifts VX to the left by 1
+                    V[0xF] = (V[getX()] >> 7) & 0x1;
+                    V[getX()] = (V[getX()] << 1);
+                    pc += 2;
+                }
+                    break;
+                default: {
+                    unknownOpcode();
+                }
+            }
         }
             break;
         case 0x9000: {// 9XY0: Skips the next instruction if VX doesn't equal VY
@@ -171,6 +236,16 @@ void Core::emulateCycle() {
             pc += 2;
         }
             break;
+        case 0xB000: {// BNNN: Jumps to the address NNN plus V0.
+            pc = (getNNN() + V[0x0]);
+        }
+            break;
+        case 0xC000: {// CXNN: Sets VX to the result of a bitwise and operation on a random number
+            // (Typically: 0 to 255) and NN.
+            V[getX()] = ((rand() % 0xFF) & getNN());
+            pc += 2;
+        }
+            break;
         case 0xD000: {// DXYN: Draws a sprite at coordinate (VX, VY)
             unsigned short xPos = V[getX()];
             unsigned short yPos = V[getY()];
@@ -182,16 +257,38 @@ void Core::emulateCycle() {
                 pixel = memory[I + yLine]; //grab sprite pixel row
                 for (int xLine = 0; xLine < 8; xLine++) { //loop through all 8 bits in pixel row
                     if ((pixel & (0x80 >> xLine)) != 0) { //check if current pixel is set to 1
-                        if (gfx[(xPos + xLine + ((yPos + yLine) * 64))] == 1) {//register collision if pixel is 1
+                        if (Graphics[(xPos + xLine + ((yPos + yLine) * 64))] == 1) {//register collision if pixel is 1
                             V[0xF] = 1;
                         }
                     }
-                    gfx[xPos + xLine + ((yPos + yLine) * 64)] ^= 1; //XOR the pixel value
+                    Graphics[xPos + xLine + ((yPos + yLine) * 64)] ^= 1; //XOR the pixel value
                 }
             }
 
-            drawFlag = true;
+            DrawFlag = true;
             pc += 2;
+        }
+            break;
+        case 0xE000: {
+            switch (opcode & 0x00FF) {
+                case 0x09E: {// EX9E: Skips the next instruction if the Key stored in VX is pressed
+                    if (V[getX()] == getKey()) {
+                        pc += 2;
+                    }
+                    pc += 2;
+                }
+                    break;
+                case 0x0A1: {// EXA1: Skips the next instruction if the Key stored in VX isn't pressed
+                    if (V[getX()] != getKey()) {
+                        pc += 2;
+                    }
+                    pc += 2;
+                }
+                    break;
+                default: {
+                    unknownOpcode();
+                }
+            }
         }
             break;
         case 0xF000: {
@@ -200,9 +297,24 @@ void Core::emulateCycle() {
             // ----------------
             // 0000000000101001 0x029
             switch (opcode & 0x00FF) {
-                case 0x00A: {// FX0A: A key press is awaited, and then stored in VX.
-                    // (Blocking Operation. All instruction halted until next key event)
+                case 0x007: {// FX07: Sets VX to the value of the delay timer
+                    V[getX()] = delayTimer;
+                    pc += 2;
+                }
+                    break;
+                case 0x00A: {// FX0A: A Key press is awaited, and then stored in VX.
+                    // (Blocking Operation. All instruction halted until next Key event)
                     V[getX()] = getKey();
+                    pc += 2;
+                }
+                    break;
+                case 0x015: {// FX15: Sets the delay timer to VX
+                    delayTimer = V[getX()];
+                    pc += 2;
+                }
+                    break;
+                case 0x018: {// FX18: Sets the sound timer to VX
+                    soundTimer = V[getX()];
                     pc += 2;
                 }
                     break;
@@ -215,6 +327,43 @@ void Core::emulateCycle() {
                 case 0x029: {// FX29: Sets I to the location of the sprite for the character in VX.
                     //Characters 0-F (in hexadecimal) are represented by a 4x5 font.
                     I = V[getX()] * 0x5;
+                    pc += 2;
+                }
+                    break;
+                case 0x033: {
+                    /*
+                     * FX33:
+                     * Stores the binary-coded decimal representation of VX, with the most significant
+                     * of three digits at the address in I, the middle digit at I plus 1, and the least
+                     * significant digit at I plus 2. (In other words, take the decimal representation of VX,
+                     * place the hundreds digit in memory at location in I, the tens digit at location I+1,
+                     * and the ones digit at location I+2.)
+                     */
+                    memory[I] = V[getX()] / 100;     // Hundredth's digit
+                    memory[I + 1] = (V[getX()] % 100) / 10; // Ten's digit
+                    memory[I + 2] = V[getX()] % 10; // One's digit
+                    pc += 2;
+                }
+                    break;
+                case 0x055: {// FX55: Stores V0 to VX (including VX) in memory starting at address I
+                    //The offset from I is increased by 1 for each value written, but I itself is left unmodified.
+                    for (int i = 0; i < getX(); i++) {
+                        memory[I + i] = V[i];
+                    }
+
+                    //From original interpreter. Not in modern implementations
+                    //I += getX() + 1;
+                    pc += 2;
+                }
+                    break;
+                case 0x065: {// FX65: Fills V0 to VX (including VX) with values from memory starting at address I
+                    // The offset from I is increased by 1 for each value written, but I itself is left unmodified.
+                    for (int i = 0; i < getX(); i++) {
+                        V[i] = memory[I + i];
+                    }
+
+                    //From original interpreter. Not in modern implementations
+                    //I += getX() + 1;
                     pc += 2;
                 }
                     break;
@@ -240,18 +389,18 @@ void Core::emulateCycle() {
 //pc += 2; //bc every instruction is 2 bytes long, we need the to increment the pc by 2
 
 //Update timers
-    if (delay_timer > 0) {
+    if (delayTimer > 0) {
         --
-                delay_timer;
+                delayTimer;
     }
 
-    if (sound_timer > 0) {
-        if (sound_timer == 1) {
+    if (soundTimer > 0) {
+        if (soundTimer == 1) {
             std::cout << "BEEP!" <<
                       std::endl;
         }
         --
-                sound_timer;
+                soundTimer;
     }
 //Timers count down at 60Hz, we need to implement something that slow down the emulation cycle
 //Execute 60 opcodes in one second

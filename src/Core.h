@@ -1,28 +1,27 @@
 #ifndef CHIP8_INTERPRETER_CORE_H
 #define CHIP8_INTERPRETER_CORE_H
 
+#include <fstream>
+#include <vector>
+#include <iostream>
+#include <string>
+#include <time.h>
+
 class Core {
 public:
-    Core();
-
-    ~Core();
-
     //2048 pixels (64 x 32) State of either 1 or 0
-    unsigned char gfx[64 * 32];
+    unsigned char Graphics[64 * 32];
 
     //Chip 8 has a HEX based keypad 0x0-0xF
-    unsigned char key[16];
+    unsigned char Key[16];
 
     // 0x00E0 - Clears the screen
     // 0xDXYN - Draws a sprite on the screen
-    bool drawFlag;
+    bool DrawFlag;
 
-    void initialize();
-
-    void loadGame(const char *romName);
-
-    void emulateCycle();
-
+    void Initialize();
+    void LoadGame(const char *romName);
+    void EmulateCycle();
 private:
     unsigned char chip8_fontset[80] =
             {
@@ -66,8 +65,8 @@ private:
     unsigned short pc;
 
     //60 Hz
-    unsigned char delay_timer;
-    unsigned char sound_timer;
+    unsigned char delayTimer;
+    unsigned char soundTimer;
 
     //Anytime you perform a jump or call a subroutine,
     //store the program counter in the stack before proceeding

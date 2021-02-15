@@ -11,20 +11,20 @@ int main() {
     //setupInput();
 
     // Initialize the Chip8 system and load the game into memory
-    core.initialize();
-    core.loadGame("chip8-test-rom.ch8");
+    core.Initialize();
+    core.LoadGame("test_opcode.ch8");
 
     // Emulation loop
     while (true) {
         // Emulate one cycle
-        core.emulateCycle();
+        core.EmulateCycle();
 
         // If the draw flag is set, update the screen
-        if (core.drawFlag) {
+        if (core.DrawFlag) {
             /*int columnCount = 0;
             int lineCount = 0;
             for (int i = 0; i < 2048; i++) {
-                std::cout << (int) core.gfx[i];
+                std::cout << (int) core.Graphics[i];
                 columnCount++;
                 if (columnCount == 64) {
                     lineCount++;
@@ -33,11 +33,10 @@ int main() {
                 }
             }*/
 
-            //renderer.drawGraphics();
-            core.drawFlag = false;
+            core.DrawFlag = false;
         }
 
-        // Store key press state (Press and Release)
+        // Store Key press state (Press and Release)
         //core.setKeys();
     }
     return 0;
