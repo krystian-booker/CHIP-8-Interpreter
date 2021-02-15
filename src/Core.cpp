@@ -18,6 +18,9 @@ void Core::initialize() {
     sp = 0;     //Reset stack pointer
 
     //Clear display
+    for (int i = 0; i < 2048; i++) {
+        gfx[i] = 0;
+    }
 
     //Clear stack
     stack[16] = {0};
@@ -89,8 +92,9 @@ void Core::emulateCycle() {
             // 00000000 0x000
             switch (opcode & 0x000F) {
                 case 0x000: {// 0x00E0: Clears the screen
-                    //TODO: Execute opcode
-                    //clearScreen();
+                    for (int i = 0; i < 2048; ++i) {
+                        gfx[i] = 0;
+                    }
                     drawFlag = true;
                     pc += 2;
                 }
@@ -115,12 +119,8 @@ void Core::emulateCycle() {
             break;
         case 0x2000: { // 2NNN: Calls subroutine at NNN
             //Store current program counter location
-            stack[sp] = pc;
-            ++sp;
-
-            //Set program counter to location of subroutine
-            unsigned short subroutineAddress = getNNN();
-            pc = subroutineAddress;
+            stack[sp++] = pc + 2;
+            pc = getNNN();
         }
             break;
         case 0x3000: {// 3XNN: Skips the next instruction if VX equals NN
@@ -190,7 +190,6 @@ void Core::emulateCycle() {
                 }
             }
 
-            //TODO: Execute opcode
             drawFlag = true;
             pc += 2;
         }
@@ -207,10 +206,15 @@ void Core::emulateCycle() {
                     pc += 2;
                 }
                     break;
+                case 0x01E: {// FX1E: Adds VX to I. VF is not affected.
+                    V[0xF] = (I + V[getX()] > 0xFFF ? 1 : 0);
+                    I += V[getX()];
+                    pc += 2;
+                }
+                    break;
                 case 0x029: {// FX29: Sets I to the location of the sprite for the character in VX.
-                    //TODO: Execute opcode
                     //Characters 0-F (in hexadecimal) are represented by a 4x5 font.
-                    //I = V[getX()];
+                    I = V[getX()] * 0x5;
                     pc += 2;
                 }
                     break;
