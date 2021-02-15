@@ -113,7 +113,7 @@ void Core::EmulateCycle() {
         case 0x2000: { // 2NNN: Calls subroutine at NNN
             //Store current program counter location
             sp++;
-            if(sp >= 16){
+            if (sp >= 16) {
                 std::cerr << "Stack overflow" << std::endl;
                 exit(1);
             }
@@ -152,7 +152,7 @@ void Core::EmulateCycle() {
 
             //TODO: Is this necessary?
             unsigned short v = V[getX()] + getNN();
-            if(v > 255){
+            if (v > 255) {
                 v -= 256;
             }
             V[getX()] = v;
@@ -249,8 +249,8 @@ void Core::EmulateCycle() {
                 for (int i = 0; i < 8; i++) {
                     int x = (V[(opcode & 0x0F00) >> 8] + i) % 64;
                     int y = (V[(opcode & 0x00F0) >> 4] + j) % 32;
-                    if  ((sprite & (0x80 >> i)) != 0) {
-                        if (Graphics[y][x]){
+                    if ((sprite & (0x80 >> i)) != 0) {
+                        if (Graphics[y][x]) {
                             V[0xF] = 1;
                         }
                         Graphics[y][x] = !Graphics[y][x];
@@ -312,8 +312,14 @@ void Core::EmulateCycle() {
                 }
                     break;
                 case 0x01E: {// FX1E: Adds VX to I. VF is not affected.
-                    V[0xF] = (I + V[getX()] > 0xFFF) ? 1 : 0;
-                    I += V[getX()];
+                    I = I + V[getX()];
+
+                    if (I > 0xFFF) {
+                        V[0xF] = 1;
+                    } else {
+                        V[0xF] = 0;
+                    }
+
                     pc += 2;
                 }
                     break;
@@ -333,11 +339,6 @@ void Core::EmulateCycle() {
                      * and the ones digit at location I+2.)
                      */
 
-                    std::cout << (int)V[getX()] << std::endl;
-                    std::cout << (int)(V[getX() % 1000] / 100) << std::endl;
-                    std::cout << (int)((V[getX()] % 100) / 10) << std::endl;
-                    std::cout << (int)(V[getX()] % 10) << std::endl;
-
                     memory[I] = V[getX()] / 100;     // Hundredth's digit
                     memory[I + 1] = (V[getX()] % 100) / 10; // Ten's digit
                     memory[I + 2] = V[getX()] % 10; // One's digit
@@ -346,7 +347,7 @@ void Core::EmulateCycle() {
                     break;
                 case 0x055: {// FX55: Stores V0 to VX (including VX) in memory starting at address I
                     //The offset from I is increased by 1 for each value written, but I itself is left unmodified.
-                    for (int i = 0; i < getX(); i++) {
+                    for (int i = 0; i <= getX(); i++) {
                         memory[I + i] = V[i];
                     }
 
@@ -357,7 +358,7 @@ void Core::EmulateCycle() {
                     break;
                 case 0x065: {// FX65: Fills V0 to VX (including VX) with values from memory starting at address I
                     // The offset from I is increased by 1 for each value written, but I itself is left unmodified.
-                    for (int i = 0; i < getX(); i++) {
+                    for (int i = 0; i <= getX(); i++) {
                         V[i] = memory[I + i];
                     }
 
