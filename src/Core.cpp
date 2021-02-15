@@ -390,17 +390,14 @@ void Core::EmulateCycle() {
 
 //Update timers
     if (delayTimer > 0) {
-        --
-                delayTimer;
+        --delayTimer;
     }
 
     if (soundTimer > 0) {
         if (soundTimer == 1) {
-            std::cout << "BEEP!" <<
-                      std::endl;
+            std::cout << "BEEP!" << std::endl;
         }
-        --
-                soundTimer;
+        --soundTimer;
     }
 //Timers count down at 60Hz, we need to implement something that slow down the emulation cycle
 //Execute 60 opcodes in one second
