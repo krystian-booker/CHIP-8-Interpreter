@@ -403,7 +403,7 @@ void Core::EmulateCycle() {
 
     if (soundTimer > 0) {
         if (soundTimer == 1) {
-            std::cout << "BEEP!" << std::endl;
+            BeepFlag = true;
         }
         --soundTimer;
     }

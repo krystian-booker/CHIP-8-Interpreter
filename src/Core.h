@@ -22,6 +22,7 @@ public:
     // 0x00E0 - Clears the screen
     // 0xDXYN - Draws a sprite on the screen
     bool DrawFlag;
+    bool BeepFlag;
 
     void Initialize();
     void LoadGame(const char *romName);
