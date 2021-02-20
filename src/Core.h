@@ -86,7 +86,6 @@ private:
     unsigned short getY();
     unsigned short getNN();
     unsigned short getNNN();
-    unsigned short getKey();
     void clearDisplay();
     void unknownOpcode();
 };

@@ -42,20 +42,12 @@ void Renderer::Terminate() {
     SDL_Quit();
 }
 
-int Renderer::Update(unsigned char _graphics[], bool _updateFrame) {
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            return 1;
-        }
-    }
-
+void Renderer::Update(unsigned char _graphics[], bool _updateFrame) {
     if (_updateFrame) {
         draw(_graphics);
     }
 
     SDL_RenderPresent(renderer);
-    return 0;
 }
 
 void Renderer::draw(unsigned char _graphics[]) {

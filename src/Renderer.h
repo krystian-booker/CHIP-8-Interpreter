@@ -7,7 +7,7 @@
 class Renderer {
 public:
     int Initialize(int _width, int _height);
-    int Update(unsigned char _graphics[], bool _updateFrame);
+    void Update(unsigned char _graphics[], bool _updateFrame);
 
     void Terminate();
 private:

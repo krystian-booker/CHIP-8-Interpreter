@@ -251,14 +251,11 @@ void Core::EmulateCycle() {
             unsigned short pixel;
 
             V[0xF] = 0;
-            for (int yline = 0; yline < height; yline++)
-            {
+            for (int yline = 0; yline < height; yline++) {
                 pixel = memory[I + yline];
-                for(int xline = 0; xline < 8; xline++)
-                {
-                    if((pixel & (0x80 >> xline)) != 0)
-                    {
-                        if(Graphics[(x + xline + ((y + yline) * WIDTH))] == 1)
+                for (int xline = 0; xline < 8; xline++) {
+                    if ((pixel & (0x80 >> xline)) != 0) {
+                        if (Graphics[(x + xline + ((y + yline) * WIDTH))] == 1)
                             V[0xF] = 1;
                         Graphics[x + xline + ((y + yline) * WIDTH)] ^= 1;
                     }
@@ -272,14 +269,14 @@ void Core::EmulateCycle() {
         case 0xE000: {
             switch (opcode & 0x00FF) {
                 case 0x09E: {// EX9E: Skips the next instruction if the Key stored in VX is pressed
-                    if (V[getX()] == getKey()) {
+                    if (Key[V[getX()]] != 0) {
                         pc += 2;
                     }
                     pc += 2;
                 }
                     break;
                 case 0x0A1: {// EXA1: Skips the next instruction if the Key stored in VX isn't pressed
-                    if (V[getX()] != getKey()) {
+                    if (Key[V[getX()]] == 0) {
                         pc += 2;
                     }
                     pc += 2;
@@ -304,9 +301,18 @@ void Core::EmulateCycle() {
                     break;
                 case 0x00A: {// FX0A: A Key press is awaited, and then stored in VX.
                     // (Blocking Operation. All instruction halted until next Key event)
-                    V[getX()] = getKey();
+                    bool keyPressed = false;
 
-                    pc += 2;
+                    for (int i = 0; i < 16; i++) {
+                        if (Key[i] == 1) {
+                            keyPressed = true;
+                            V[getX()] = (uint8_t) i;
+                        }
+                    }
+
+                    if(keyPressed){
+                        pc += 2;
+                    }
                 }
                     break;
                 case 0x015: {// FX15: Sets the delay timer to VX
@@ -439,13 +445,8 @@ unsigned short Core::getNNN() {
     return (opcode & 0x0FFF);
 }
 
-unsigned short Core::getKey() {
-    //TODO: Implement getKey
-    return 0xF;
-}
-
 void Core::clearDisplay() {
-    for(int i = 0; i < 2048; i++){
+    for (int i = 0; i < 2048; i++) {
         Graphics[i] = 0;
     }
 }
@@ -455,10 +456,10 @@ void Core::unknownOpcode() {
     exit(1);
 }
 
-int Core::GetWidth(){
+int Core::GetWidth() {
     return WIDTH;
 }
 
-int Core::GetHeight(){
+int Core::GetHeight() {
     return HEIGHT;
 }
