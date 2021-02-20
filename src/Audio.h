@@ -11,6 +11,7 @@ public:
     static void close(); // Close the audio device
 
     static void Beep();
+
     static SDL_AudioSpec m_obtainedSpec;
 
 private:

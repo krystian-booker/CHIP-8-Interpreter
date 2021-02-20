@@ -13,13 +13,13 @@ int Renderer::Initialize(int _width, int _height) {
 
     //Create window
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    window = SDL_CreateWindow("chip8",
+    window = SDL_CreateWindow("CHIP-8",
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
                               (width * viewScaling),
                               (height * viewScaling),
                               SDL_WINDOW_SHOWN);
-    if (window == NULL) {
+    if (window == nullptr) {
         std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
         return 1;
     }
@@ -27,7 +27,7 @@ int Renderer::Initialize(int _width, int _height) {
     //Create renderer
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     SDL_RenderSetScale(renderer, viewScaling, viewScaling);
-    if (renderer == NULL) {
+    if (renderer == nullptr) {
         std::cerr << "Renderer could not be created! SDL Error:" << SDL_GetError() << std::endl;
         return 1;
     } else {
@@ -50,7 +50,7 @@ void Renderer::Update(unsigned char _graphics[], bool _updateFrame) {
     SDL_RenderPresent(renderer);
 }
 
-void Renderer::draw(unsigned char _graphics[]) {
+void Renderer::draw(const unsigned char _graphics[]) {
     //Set background color
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
     SDL_RenderClear(renderer);

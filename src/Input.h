@@ -6,7 +6,7 @@
 
 class Input {
 public:
-    int UpdateInput(unsigned char Key[16]);
+    static int UpdateInput(unsigned char Key[16]);
 };
 
 

@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include <time.h>
+#include <ctime>
 #include <array>
 
 #define WIDTH 64
@@ -17,18 +17,23 @@ public:
     unsigned char Graphics[WIDTH * HEIGHT] = {0};
 
     //Chip 8 has a HEX based keypad 0x0-0xF
-    unsigned char Key[16];
+    unsigned char Key[16]{0};
 
     // 0x00E0 - Clears the screen
     // 0xDXYN - Draws a sprite on the screen
-    bool DrawFlag;
-    bool BeepFlag;
+    bool DrawFlag{false};
+    bool BeepFlag{false};
 
     void Initialize();
+
     void LoadGame(const char *romName);
+
     void EmulateCycle();
-    int GetWidth();
-    int GetHeight();
+
+    static int GetWidth();
+
+    static int GetHeight();
+
 private:
     unsigned char chip8_fontset[80] =
             {
@@ -52,7 +57,7 @@ private:
 
     //Chip 8s opcodes are all two bytes long.
     //unsigned short has the length of two bytes.
-    unsigned short opcode;
+    unsigned short opcode{0};
 
     /*
      * Chip 8 has 4K of memory
@@ -68,12 +73,12 @@ private:
 
     //The index register (I) and program count (pc) can
     //have a value from 0x000 to 0xFFF
-    unsigned short I;
-    unsigned short pc;
+    unsigned short I{0};
+    unsigned short pc{0};
 
     //60 Hz
-    unsigned char delayTimer;
-    unsigned char soundTimer;
+    unsigned char delayTimer{0};
+    unsigned char soundTimer{0};
 
     //Anytime you perform a jump or call a subroutine,
     //store the program counter in the stack before proceeding
@@ -82,12 +87,17 @@ private:
 
     bool debug = {false};
 
-    unsigned short getX();
-    unsigned short getY();
-    unsigned short getNN();
-    unsigned short getNNN();
+    unsigned short getX() const;
+
+    unsigned short getY() const;
+
+    unsigned short getNN() const;
+
+    unsigned short getNNN() const;
+
     void clearDisplay();
-    void unknownOpcode();
+
+    void unknownOpcode() const;
 };
 
 #endif //CHIP8_INTERPRETER_CORE_H

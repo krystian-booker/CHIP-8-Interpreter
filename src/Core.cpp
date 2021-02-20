@@ -30,7 +30,7 @@ void Core::Initialize() {
     soundTimer = 0;
 
     //Random seed
-    srand(time(NULL));
+    srand(time(nullptr));
 }
 
 // Copy the program into the memory
@@ -50,8 +50,8 @@ void Core::LoadGame(const char *romName) {
     }
 
     if (debug) {
-        for (int i = 0; i < 4096; i++) {
-            std::cout << (int) memory[i] << " ";
+        for (unsigned char i : memory) {
+            std::cout << (int) i << " ";
         }
     }
 
@@ -149,8 +149,6 @@ void Core::EmulateCycle() {
         }
             break;
         case 0x7000: {// 7XNN: Adds NN to VX. (Carry flag is not changed)
-
-            //TODO: Is this necessary?
             unsigned short v = V[getX()] + getNN();
             if (v > 255) {
                 v -= 256;
@@ -182,14 +180,12 @@ void Core::EmulateCycle() {
                 }
                     break;
                 case 0x004: {// 8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
-                    //TODO: Add documentation
                     V[0xF] = ((int) V[getX()] + (int) V[getY()]) > 255 ? 1 : 0;
                     V[getX()] += V[getY()];
                     pc += 2;
                 }
                     break;
                 case 0x005: {// 8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't
-                    //TODO: Add documentation
                     V[0xF] = (V[getX()] > V[getY()]) ? 1 : 0;
                     V[getX()] -= V[getY()];
                     pc += 2;
@@ -202,7 +198,6 @@ void Core::EmulateCycle() {
                 }
                     break;
                 case 0x007: {// 8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
-                    //TODO: Add documentation
                     V[0xF] = (V[getY()] > V[getX()]) ? 1 : 0;
                     V[getX()] = V[getY()] - V[getX()];
                     pc += 2;
@@ -310,7 +305,7 @@ void Core::EmulateCycle() {
                         }
                     }
 
-                    if(keyPressed){
+                    if (keyPressed) {
                         pc += 2;
                     }
                 }
@@ -417,7 +412,7 @@ void Core::EmulateCycle() {
 //Execute 60 opcodes in one second
 }
 
-unsigned short Core::getX() {
+unsigned short Core::getX() const {
     //ex. opcode = 0x6801;
     //0110100000000001
     //0000111100000000
@@ -427,7 +422,7 @@ unsigned short Core::getX() {
     return (opcode & 0x0F00) >> 8;
 }
 
-unsigned short Core::getY() {
+unsigned short Core::getY() const {
     //ex. opcode = 0x5560;
     //0101010101100000
     //0000000011110000
@@ -437,21 +432,21 @@ unsigned short Core::getY() {
     return (opcode & 0x00F0) >> 4;
 }
 
-unsigned short Core::getNN() {
+unsigned short Core::getNN() const {
     return (opcode & 0x00FF);
 }
 
-unsigned short Core::getNNN() {
+unsigned short Core::getNNN() const {
     return (opcode & 0x0FFF);
 }
 
 void Core::clearDisplay() {
-    for (int i = 0; i < 2048; i++) {
-        Graphics[i] = 0;
+    for (unsigned char &Graphic : Graphics) {
+        Graphic = 0;
     }
 }
 
-void Core::unknownOpcode() {
+void Core::unknownOpcode() const {
     std::cerr << "Unknown opcode: " << opcode << std::endl;
     exit(1);
 }

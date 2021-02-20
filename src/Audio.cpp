@@ -24,7 +24,7 @@ int calculateOffset_s16(int sample, int channel) {
 // Convert a normalized data value (range: 0.0 .. 1.0) to a data value matching
 // the audio format.
 void writeData_s16(uint8_t *ptr, double data) {
-    int16_t *ptrTyped = (int16_t *) ptr;
+    auto *ptrTyped = (int16_t *) ptr;
     double range = (double) INT16_MAX - (double) INT16_MIN;
     double dataScaled = data * range / 2.0;
     *ptrTyped = dataScaled;
@@ -32,7 +32,7 @@ void writeData_s16(uint8_t *ptr, double data) {
 
 // Generate audio data. This is how the waveform is generated.
 double Audio::getData() {
-    double sampleRate = (double) (m_obtainedSpec.freq);
+    auto sampleRate = (double) (m_obtainedSpec.freq);
 
     // Units: samples
     double period = sampleRate / m_frequency;
@@ -81,7 +81,7 @@ void Audio::open() {
     desiredSpec.callback = Audio::audioCallback;
 
     m_audioDevice = SDL_OpenAudioDevice(
-            NULL, // device (name of the device, which we don't care about)
+            nullptr, // device (name of the device, which we don't care about)
             0, // iscapture (we are not recording sound)
             &desiredSpec, // desired
             &m_obtainedSpec, // obtained
@@ -99,7 +99,7 @@ void Audio::open() {
 void Audio::Beep() {
     //TODO: Separate thread to not lag the game
     SDL_PauseAudioDevice(m_audioDevice, 0);
-    std::this_thread::sleep_for (std::chrono::milliseconds(16)); // Sleep 16 ms
+    std::this_thread::sleep_for(std::chrono::milliseconds(16)); // Sleep 16 ms
     SDL_PauseAudioDevice(m_audioDevice, 1);
 }
 

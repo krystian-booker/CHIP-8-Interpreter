@@ -6,18 +6,17 @@ int Input::UpdateInput(unsigned char Key[16]) {
         switch (event.type) {
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                switch (event.key.keysym.sym)
-                {
-                    case SDLK_1:
+                switch (event.key.keysym.sym) {
+                    case SDLK_x:
                         Key[0] = !Key[0];
                         break;
-                    case SDLK_2:
+                    case SDLK_1:
                         Key[1] = !Key[1];
                         break;
-                    case SDLK_3:
+                    case SDLK_2:
                         Key[2] = !Key[2];
                         break;
-                    case SDLK_4:
+                    case SDLK_3:
                         Key[3] = !Key[3];
                         break;
                     case SDLK_q:
@@ -29,28 +28,28 @@ int Input::UpdateInput(unsigned char Key[16]) {
                     case SDLK_e:
                         Key[6] = !Key[6];
                         break;
-                    case SDLK_r:
+                    case SDLK_a:
                         Key[7] = !Key[7];
                         break;
-                    case SDLK_a:
+                    case SDLK_s:
                         Key[8] = !Key[8];
                         break;
-                    case SDLK_s:
+                    case SDLK_d:
                         Key[9] = !Key[9];
                         break;
-                    case SDLK_d:
+                    case SDLK_z:
                         Key[10] = !Key[10];
                         break;
-                    case SDLK_f:
+                    case SDLK_c:
                         Key[11] = !Key[11];
                         break;
-                    case SDLK_z:
+                    case SDLK_4:
                         Key[12] = !Key[12];
                         break;
-                    case SDLK_x:
+                    case SDLK_r:
                         Key[13] = !Key[13];
                         break;
-                    case SDLK_c:
+                    case SDLK_f:
                         Key[14] = !Key[14];
                         break;
                     case SDLK_v:

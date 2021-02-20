@@ -1,5 +1,4 @@
 // System Headers
-#include <iostream>
 #include "chrono"
 #include "thread"
 
@@ -11,21 +10,15 @@
 
 Core core;
 Renderer renderer;
-Audio audio;
-Input input;
 
 int main(int argc, char *args[]) {
-    if(!args[1]){
-        std::cout << "Please enter a game" << std::endl;
-    }
-
     //Initialize Audio
     SDL_Init(SDL_INIT_AUDIO);
     Audio::open();
 
     //Initialize the core, load rom into memory
     core.Initialize();
-    core.LoadGame(args[1]);
+    core.LoadGame("Blitz [David Winter].ch8");
 
     renderer.Initialize(core.GetWidth(), core.GetHeight());
 
@@ -39,14 +32,13 @@ int main(int argc, char *args[]) {
             core.DrawFlag = false;
         }
 
-        int status = input.UpdateInput(core.Key);
+        int status = Input::UpdateInput(core.Key);
         if (status != 0) {
             gameActive = false;
         }
 
-        //TODO: Refactor
         if (core.BeepFlag) {
-            audio.Beep();
+            Audio::Beep();
             core.BeepFlag = false;
         }
 
