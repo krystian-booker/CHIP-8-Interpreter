@@ -1,5 +1,5 @@
 # CHIP-8 Interpreter
-CHIP-8 Interpreter is a cross platform application to run chip-8 roms. 
+CHIP-8 Interpreter is a cross-platform application to run chip-8 ROMs. 
 This was written in C++ using SDL2.
 
 
@@ -17,11 +17,11 @@ This was written in C++ using SDL2.
 ## Known Issues
 
 - Currently audio is running on the same thread as the core. When audio is triggered the core will lag for one cycle
-- Core speed is not accurate. Currently the core is sleeping for 16 milliseconds after every cycle to roughly reach 60 cycles per second.
+- Core speed is not accurate. Currently, the core is sleeping for 16 milliseconds after every cycle to roughly reach 60 cycles per second.
 
 ## Future work
 
-- Refactor improper C++. Code base does not follow best practices and leaves lot of room for imrpovement.
+- Refactor improper C++. Code base does not follow best practices and leaves a lot of room for improvement.
 - Refactor the massive switch statement of Opcodes to instead use function pointers.
 - Implement Super CHIP-8 Opcodes
 
