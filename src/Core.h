@@ -100,7 +100,63 @@ private:
 
     void clearDisplay();
 
-    void unknownOpcode() const;
+    void unknownOpcode();
+
+    // Opcodes are dispatched through function pointer tables rather than a
+    // nested switch. The primary table is indexed by the high nibble of the
+    // opcode. The 0x0, 0x8, 0xE and 0xF groups share that nibble across
+    // several instructions, so each one routes through a secondary table.
+    typedef void (Core::*OpcodeHandler)();
+
+    OpcodeHandler mainTable[0x10]{};
+    OpcodeHandler table0[0x10]{};
+    OpcodeHandler table8[0x10]{};
+    OpcodeHandler tableE[0x10]{};
+    OpcodeHandler tableF[0x100]{};
+
+    void setupTables();
+
+    // Secondary dispatchers for opcode groups that need a further decode.
+    void dispatch0();
+    void dispatch8();
+    void dispatchE();
+    void dispatchF();
+
+    // One handler per opcode, named after the instruction it implements.
+    void OP_00E0();
+    void OP_00EE();
+    void OP_1nnn();
+    void OP_2nnn();
+    void OP_3xnn();
+    void OP_4xnn();
+    void OP_5xy0();
+    void OP_6xnn();
+    void OP_7xnn();
+    void OP_8xy0();
+    void OP_8xy1();
+    void OP_8xy2();
+    void OP_8xy3();
+    void OP_8xy4();
+    void OP_8xy5();
+    void OP_8xy6();
+    void OP_8xy7();
+    void OP_8xyE();
+    void OP_9xy0();
+    void OP_Annn();
+    void OP_Bnnn();
+    void OP_Cxnn();
+    void OP_Dxyn();
+    void OP_Ex9E();
+    void OP_ExA1();
+    void OP_Fx07();
+    void OP_Fx0A();
+    void OP_Fx15();
+    void OP_Fx18();
+    void OP_Fx1E();
+    void OP_Fx29();
+    void OP_Fx33();
+    void OP_Fx55();
+    void OP_Fx65();
 };
 
 #endif //CHIP8_INTERPRETER_CORE_H

@@ -35,7 +35,6 @@ The CPU runs at a fixed clock of 700Hz while the display and timers run at 60Hz,
 
 ## Future Work
 
-- Replace the large opcode switch statement with a function pointer table.
 - Implement the Super CHIP-8 opcodes.
 
 ## References
