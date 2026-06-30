@@ -3,9 +3,11 @@ project(chip8_interpreter)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-find_package(SDL2 REQUIRED)
-
-include_directories(${SDL2_INCLUDE_DIR})
+find_package(SDL2 CONFIG QUIET)
+if(NOT SDL2_FOUND)
+    find_package(SDL2 REQUIRED)
+    include_directories(${SDL2_INCLUDE_DIR})
+endif()
 
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
@@ -19,4 +21,10 @@ source_group("Headers" FILES ${PROJECT_HEADERS})
 source_group("Sources" FILES ${PROJECT_SOURCES})
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
-target_link_libraries(${PROJECT_NAME} SDL2main SDL2 -lmingw32 -lSDL2main -lSDL2)
+if(TARGET SDL2::SDL2main)
+    target_link_libraries(${PROJECT_NAME} SDL2::SDL2main SDL2::SDL2)
+elseif(MINGW)
+    target_link_libraries(${PROJECT_NAME} mingw32 SDL2main SDL2)
+else()
+    target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARY})
+endif()

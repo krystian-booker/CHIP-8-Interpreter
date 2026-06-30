@@ -326,21 +326,21 @@ void Core::OP_Cxnn() {
 
 // DXYN: Draws a sprite at coordinate (VX, VY)
 void Core::OP_Dxyn() {
-    //Graphics drawing from
-    //http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter#
-    unsigned short x = V[(opcode & 0x0F00) >> 8];
-    unsigned short y = V[(opcode & 0x00F0) >> 4];
+    //Starting coordinate wraps; pixels past the edge are clipped (CHIP-8 spec).
+    unsigned short x = V[(opcode & 0x0F00) >> 8] % WIDTH;
+    unsigned short y = V[(opcode & 0x00F0) >> 4] % HEIGHT;
     unsigned short height = opcode & 0x000F;
     unsigned short pixel;
 
     V[0xF] = 0;
     for (int yline = 0; yline < height; yline++) {
+        int py = y + yline;
+        if (py >= HEIGHT) break;            // clip rows below the bottom edge
         pixel = memory[I + yline];
         for (int xline = 0; xline < 8; xline++) {
+            int px = x + xline;
+            if (px >= WIDTH) break;          // clip columns past the right edge
             if ((pixel & (0x80 >> xline)) != 0) {
-                //Wrap coordinates so sprites near the edge don't index out of bounds
-                int px = (x + xline) % WIDTH;
-                int py = (y + yline) % HEIGHT;
                 int index = px + (py * WIDTH);
                 if (Graphics[index] == 1)
                     V[0xF] = 1;
