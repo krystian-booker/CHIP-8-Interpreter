@@ -7,6 +7,7 @@
 #include <string>
 #include <ctime>
 #include <array>
+#include <cstdint>
 
 #define WIDTH 64
 #define HEIGHT 32
@@ -29,6 +30,8 @@ public:
     void LoadGame(const char *romName);
 
     void EmulateCycle();
+
+    void UpdateTimers();
 
     static int GetWidth();
 

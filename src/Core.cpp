@@ -12,13 +12,19 @@ void Core::Initialize() {
     DrawFlag = true;
 
     //Clear stack
-    stack[16] = {0};
+    for (unsigned short &s : stack) {
+        s = 0;
+    }
 
     //Clear registers V0-VF
-    V[16] = {0};
+    for (unsigned char &reg : V) {
+        reg = 0;
+    }
 
     //Clear memory
-    memory[4096] = {0};
+    for (unsigned char &m : memory) {
+        m = 0;
+    }
 
     //Load font set
     for (int i = 0; i < 80; i++) {
@@ -186,7 +192,7 @@ void Core::EmulateCycle() {
                 }
                     break;
                 case 0x005: {// 8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't
-                    V[0xF] = (V[getX()] > V[getY()]) ? 1 : 0;
+                    V[0xF] = (V[getX()] >= V[getY()]) ? 1 : 0;
                     V[getX()] -= V[getY()];
                     pc += 2;
                 }
@@ -198,7 +204,7 @@ void Core::EmulateCycle() {
                 }
                     break;
                 case 0x007: {// 8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
-                    V[0xF] = (V[getY()] > V[getX()]) ? 1 : 0;
+                    V[0xF] = (V[getY()] >= V[getX()]) ? 1 : 0;
                     V[getX()] = V[getY()] - V[getX()];
                     pc += 2;
                 }
@@ -233,7 +239,7 @@ void Core::EmulateCycle() {
             break;
         case 0xC000: {// CXNN: Sets VX to the result of a bitwise and operation on a random number
             // (Typically: 0 to 255) and NN.
-            V[getX()] = ((rand() % 0xFF) & getNN());
+            V[getX()] = ((rand() % 256) & getNN());
             pc += 2;
         }
             break;
@@ -250,9 +256,13 @@ void Core::EmulateCycle() {
                 pixel = memory[I + yline];
                 for (int xline = 0; xline < 8; xline++) {
                     if ((pixel & (0x80 >> xline)) != 0) {
-                        if (Graphics[(x + xline + ((y + yline) * WIDTH))] == 1)
+                        //Wrap coordinates so sprites near the edge don't index out of bounds
+                        int px = (x + xline) % WIDTH;
+                        int py = (y + yline) % HEIGHT;
+                        int index = px + (py * WIDTH);
+                        if (Graphics[index] == 1)
                             V[0xF] = 1;
-                        Graphics[x + xline + ((y + yline) * WIDTH)] ^= 1;
+                        Graphics[index] ^= 1;
                     }
                 }
             }
@@ -397,19 +407,21 @@ void Core::EmulateCycle() {
 //I = opcode & 0x0FFF;
 //pc += 2; //bc every instruction is 2 bytes long, we need the to increment the pc by 2
 
-//Update timers
+}
+
+// Decrement the timers. This is decoupled from EmulateCycle so that the CPU
+// can run many instructions per frame while the timers tick down at 60Hz.
+void Core::UpdateTimers() {
     if (delayTimer > 0) {
         --delayTimer;
     }
 
     if (soundTimer > 0) {
-        if (soundTimer == 1) {
-            BeepFlag = true;
-        }
         --soundTimer;
     }
-//Timers count down at 60Hz, we need to implement something that slow down the emulation cycle
-//Execute 60 opcodes in one second
+
+    // The beeper should sound for the entire duration the sound timer is active.
+    BeepFlag = (soundTimer > 0);
 }
 
 unsigned short Core::getX() const {

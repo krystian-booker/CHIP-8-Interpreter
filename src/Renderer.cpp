@@ -34,6 +34,8 @@ int Renderer::Initialize(int _width, int _height) {
         //Initialize renderer color
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     }
+
+    return 0;
 }
 
 void Renderer::Terminate() {

@@ -3,14 +3,12 @@
 #include "chrono"
 #include "thread"
 
-// This class is a singleton, which is bad practice. However, this makes the
-// implementation more straightforward.
 class Audio {
 public:
     static void open(); // Open the audio device
     static void close(); // Close the audio device
 
-    static void Beep();
+    static void SetPlaying(bool playing);
 
     static SDL_AudioSpec m_obtainedSpec;
 

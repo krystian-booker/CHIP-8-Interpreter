@@ -30,7 +30,7 @@ void writeData_s16(uint8_t *ptr, double data) {
     *ptrTyped = dataScaled;
 }
 
-// Generate audio data. This is how the waveform is generated.
+// Generate a single sample of the sine wave tone.
 double Audio::getData() {
     auto sampleRate = (double) (m_obtainedSpec.freq);
 
@@ -81,26 +81,24 @@ void Audio::open() {
     desiredSpec.callback = Audio::audioCallback;
 
     m_audioDevice = SDL_OpenAudioDevice(
-            nullptr, // device (name of the device, which we don't care about)
-            0, // iscapture (we are not recording sound)
-            &desiredSpec, // desired
-            &m_obtainedSpec, // obtained
-            0 // allowed_changes (allow any changes between desired and obtained)
+            nullptr, // default device
+            0, // playback, not capture
+            &desiredSpec,
+            &m_obtainedSpec,
+            0 // don't allow format changes
     );
 
     if (m_audioDevice == 0) {
         SDL_Log("Failed to open audio: %s", SDL_GetError());
-        // TODO: throw exception
     }
     m_writeData = writeData_s16;
     m_calculateOffset = calculateOffset_s16;
 }
 
-void Audio::Beep() {
-    //TODO: Separate thread to not lag the game
-    SDL_PauseAudioDevice(m_audioDevice, 0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(16)); // Sleep 16 ms
-    SDL_PauseAudioDevice(m_audioDevice, 1);
+// Start or stop the tone without blocking the main loop. SDL keeps filling the
+// audio buffer via audioCallback while the device is unpaused.
+void Audio::SetPlaying(bool playing) {
+    SDL_PauseAudioDevice(m_audioDevice, playing ? 0 : 1);
 }
 
 void Audio::close() {

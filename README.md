@@ -1,30 +1,43 @@
 # CHIP-8 Interpreter
-CHIP-8 Interpreter is a cross-platform application to run chip-8 ROMs. 
-This was written in C++ using SDL2.
 
+A cross-platform CHIP-8 interpreter for running CHIP-8 ROMs, written in C++ using SDL2.
 
-|  Function | Implementation |
-| ------------- | ------------- |
-| Opcodes  | Completed ✅   |
-| Rendering  | Completed ✅   |
-| Audio  | Working with issues ⚠️  |
-| Input  | Completed ✅   |
-<br/>
+| Function  | Status   |
+| --------- | -------- |
+| Opcodes   | Complete |
+| Rendering | Complete |
+| Audio     | Complete |
+| Input     | Complete |
 
-![Chip-8 gif](chip_8_blitz.gif)
+![Chip-8 gif](assets/chip_8_blitz.gif)
 
+## Usage
 
-## Known Issues
+The ROM to run is passed as the first argument:
 
-- Currently audio is running on the same thread as the core. When audio is triggered the core will lag for one cycle
-- Core speed is not accurate. Currently, the core is sleeping for 16 milliseconds after every cycle to roughly reach 60 cycles per second.
+```
+chip8_interpreter <rom>
+```
 
-## Future work
+### Controls
 
-- Refactor improper C++. Code base does not follow best practices and leaves a lot of room for improvement.
-- Refactor the massive switch statement of Opcodes to instead use function pointers.
-- Implement Super CHIP-8 Opcodes
+The original CHIP-8 keypad is mapped to the left side of the keyboard:
 
-### References
+```
+CHIP-8        Keyboard
+1 2 3 C       1 2 3 4
+4 5 6 D       Q W E R
+7 8 9 E       A S D F
+A 0 B F       Z X C V
+```
+
+The CPU runs at a fixed clock of 700Hz while the display and timers run at 60Hz, both driven by the real elapsed time so the speed stays consistent across machines. The clock rate can be adjusted with the `cpuClockHz` constant in `main.cpp`.
+
+## Future Work
+
+- Replace the large opcode switch statement with a function pointer table.
+- Implement the Super CHIP-8 opcodes.
+
+## References
 
 - http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
